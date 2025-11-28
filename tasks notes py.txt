@@ -1,0 +1,206 @@
+Tasks:-
+json,csv,mysql.connector  users in python
+-----------------------------------------
+--------------
+Task 1: 
+--------------
+import requests,json,csv,mysql.connector
+try:
+
+    fp1=open("user.json",'w')
+    fp2=open('user.csv','w',newline="")
+    #Extract Data from Rest API
+    user_resp=requests.get('https://jsonplaceholder.typicode.com/users')
+    users=user_resp.json()
+    #Transform for CSV File and json file
+    user_data_t=[]
+    user_data_d=[]
+    for user in users:
+        user_data_t.append((user['id'],
+                          user['username'],
+                          user['email'],
+                          user['address']['city']))
+        user_data_d.append({"uid":user['id'],
+                           "uname":user['username'],
+                           "email":user['email'],
+                           "city":user['address']['city']})
+
+    
+    #a)CSV File  
+    cw_obj=csv.writer(fp2)
+    cw_obj.writerow(["uid","uname","email","city"])
+    cw_obj.writerows(user_data_t)
+    print("New CSV File Created Successfully")
+
+    #  file
+    json.dump(user_data_d,fp1)
+    print("New JSON file Created")
+
+    #mysql connector
+    dbcon=None
+    cursor=None
+    dbcon=mysql.connector.connect(
+                                host="localhost",
+                                user='root',
+                                password='root',
+                                database='db5'
+    )
+    print(dbcon.is_connected())
+    cursor=dbcon.cursor()
+    sql_st=''' INSERT INTO users(uid,uname,email,city)values(%s,%s,%s,%s);'''
+    cursor.executemany(sql_st,user_data_t)
+    dbcon.commit()
+    print("Data Inserted Successfully!")
+except mysql.connector.Error as err:
+    print(err)
+finally:
+    cursor.close()
+    dbcon.close()
+     
+------------------------------
+mysql table create:
+-------------------------------
+
+mysql> create table users(
+    -> uid int primary key,
+    -> uname varchar(32) NOT NULL,
+    -> email varchar(32),
+    -> city varchar(32)
+    -> );
+Query OK, 0 rows affected (0.13 sec)
+
+--------------------------
+output:
+------------------------
+mysql> select * from users;
++-----+------------------+---------------------------+----------------+
+| uid | uname            | email                     | city           |
++-----+------------------+---------------------------+----------------+
+|   1 | Bret             | Sincere@april.biz         | Gwenborough    |
+|   2 | Antonette        | Shanna@melissa.tv         | Wisokyburgh    |
+|   3 | Samantha         | Nathan@yesenia.net        | McKenziehaven  |
+|   4 | Karianne         | Julianne.OConner@kory.org | South Elvis    |
+|   5 | Kamren           | Lucio_Hettinger@annie.ca  | Roscoeview     |
+|   6 | Leopoldo_Corkery | Karley_Dach@jasper.info   | South Christy  |
+|   7 | Elwyn.Skiles     | Telly.Hoeger@billy.biz    | Howemouth      |
+|   8 | Maxime_Nienow    | Sherwood@rosamond.me      | Aliyaview      |
+|   9 | Delphine         | Chaim_McDermott@dana.io   | Bartholomebury |
+|  10 | Moriah.Stanton   | Rey.Padberg@karina.biz    | Lebsackbury    |
++-----+------------------+---------------------------+----------------+
+10 rows in set (0.00 sec)
+
+
+-----------------
+Task 2:-
+-----------------
+import requests,json,csv,mysql.connector
+try:
+    fp=open("product.json",'w')
+    fw=open("product.csv",'w',newline='')
+    #Extraxt data from restAPI
+    product_resp=requests.get("https://dummyjson.com/products")
+    products=product_resp.json()['products']
+
+    product_data_t=[]
+    product_data_d=[]
+    for product in products:
+        product_data_t.append((product['id'],
+                          product['title'],
+                          product['category'],
+                          product['price'],
+                          product['rating']))
+        product_data_d.append({"id":product['id'],
+                               "title":product['title'],
+                               "category":product['category'],
+                               "price":product['price'],
+                               "rating":product['rating']
+                              })
+#CSV file                         
+    guru=csv.writer(fw)
+    guru.writerow(["id","title","category","price","rating"])
+    guru.writerows(product_data_t)
+    print("CSV file is created Successfully")
+
+#json file
+    json.dump(product_data_d,fp)
+    print("New json file is created")
+#mysql connector
+    dbcon=None
+    cursor=None
+    dbcon=mysql.connector.connect(
+                                  host='localhost',
+                                  user='root',
+                                  password='root',
+                                  database='db5'
+    )
+    print(dbcon.is_connected())
+    cursor=dbcon.cursor()
+
+    guru1='''INSERT INTO Products (id,title,category,price,rating) values(%s,%s,%s,%s,%s);'''
+    cursor.executemany(guru1,product_data_t)
+    dbcon.commit()
+    print("Inserted values Successful")
+except mysql.connector.Error as err:
+    print(err)
+finally:
+    dbcon.close()
+    cursor.close()
+	
+	
+---------------------
+output:
+---------------------
+
+
+mysql> create table products(
+    -> id int primary key,
+    -> title varchar (64),
+    -> category varchar(32),
+    -> price int,
+    -> rating float
+    -> );
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> select * from products;
++----+-------------------------------------------+------------+-------+--------+
+| id | title                                     | category   | price | rating |
++----+-------------------------------------------+------------+-------+--------+
+|  1 | Essence Mascara Lash Princess             | beauty     |    10 |   2.56 |
+|  2 | Eyeshadow Palette with Mirror             | beauty     |    20 |   2.86 |
+|  3 | Powder Canister                           | beauty     |    15 |   4.64 |
+|  4 | Red Lipstick                              | beauty     |    13 |   4.36 |
+|  5 | Red Nail Polish                           | beauty     |     9 |   4.32 |
+|  6 | Calvin Klein CK One                       | fragrances |    50 |   4.37 |
+|  7 | Chanel Coco Noir Eau De                   | fragrances |   130 |   4.26 |
+|  8 | Dior J'adore                              | fragrances |    90 |    3.8 |
+|  9 | Dolce Shine Eau de                        | fragrances |    70 |   3.96 |
+| 10 | Gucci Bloom Eau de                        | fragrances |    80 |   2.74 |
+| 11 | Annibale Colombo Bed                      | furniture  |  1900 |   4.77 |
+| 12 | Annibale Colombo Sofa                     | furniture  |  2500 |   3.92 |
+| 13 | Bedside Table African Cherry              | furniture  |   300 |   2.87 |
+| 14 | Knoll Saarinen Executive Conference Chair | furniture  |   500 |   4.88 |
+| 15 | Wooden Bathroom Sink With Mirror          | furniture  |   800 |   3.59 |
+| 16 | Apple                                     | groceries  |     2 |   4.19 |
+| 17 | Beef Steak                                | groceries  |    13 |   4.47 |
+| 18 | Cat Food                                  | groceries  |     9 |   3.13 |
+| 19 | Chicken Meat                              | groceries  |    10 |   3.19 |
+| 20 | Cooking Oil                               | groceries  |     5 |    4.8 |
+| 21 | Cucumber                                  | groceries  |     1 |   4.07 |
+| 22 | Dog Food                                  | groceries  |    11 |   4.55 |
+| 23 | Eggs                                      | groceries  |     3 |   2.53 |
+| 24 | Fish Steak                                | groceries  |    15 |   3.78 |
+| 25 | Green Bell Pepper                         | groceries  |     1 |   3.25 |
+| 26 | Green Chili Pepper                        | groceries  |     1 |   3.66 |
+| 27 | Honey Jar                                 | groceries  |     7 |   3.97 |
+| 28 | Ice Cream                                 | groceries  |     5 |   3.39 |
+| 29 | Juice                                     | groceries  |     4 |   3.94 |
+| 30 | Kiwi                                      | groceries  |     2 |   4.93 |
++----+-------------------------------------------+------------+-------+--------+
+30 rows in set (0.00 sec)
+
+
+
+
+
+
+
